@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.Unit", "Tests.Unit\Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.Integration", "Tests.Integration\Tests.Integration.csproj", "{171E81A4-D532-463D-8FA1-9B39B67BC6E7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Persistence", "Persistence\Persistence.csproj", "{498BADDA-B400-4B59-9810-1DABF17C60E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,9 +55,14 @@ Global
 		{171E81A4-D532-463D-8FA1-9B39B67BC6E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{171E81A4-D532-463D-8FA1-9B39B67BC6E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{171E81A4-D532-463D-8FA1-9B39B67BC6E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{498BADDA-B400-4B59-9810-1DABF17C60E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{498BADDA-B400-4B59-9810-1DABF17C60E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{498BADDA-B400-4B59-9810-1DABF17C60E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{498BADDA-B400-4B59-9810-1DABF17C60E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{96447796-8AD5-455F-A48F-1F6E4D5451DE} = {5AC9DB5E-E4AA-4721-B86F-94D78F413D71}
 		{171E81A4-D532-463D-8FA1-9B39B67BC6E7} = {5AC9DB5E-E4AA-4721-B86F-94D78F413D71}
+		{498BADDA-B400-4B59-9810-1DABF17C60E7} = {799D309F-3B10-44D9-A8C3-43315F60D72E}
 	EndGlobalSection
 EndGlobal
