@@ -1,0 +1,1 @@
+throw new ArgumentException("Данный проект является общим для всех Api");
