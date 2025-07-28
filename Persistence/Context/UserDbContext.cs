@@ -3,13 +3,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.Context;
 
-public partial class DContext : DbContext
+public partial class UserDbContext : DbContext
 {
-    public DContext()
+    public UserDbContext()
     {
     }
 
-    public DContext(DbContextOptions<DContext> options)
+    public UserDbContext(DbContextOptions<UserDbContext> options)
         : base(options)
     {
     }
