@@ -10,9 +10,9 @@ public partial class Role
 
     public string? Description { get; set; }
 
-    public bool Issystem { get; set; }
+    public bool IsSystem { get; set; }
 
-    public DateTime Createdat { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
 

@@ -43,15 +43,15 @@ public partial class UserDbContext : DbContext
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("id");
-            entity.Property(e => e.Createdat)
+            entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
-                .HasColumnName("createdat");
+                .HasColumnName("created_at");
             entity.Property(e => e.Description)
                 .HasMaxLength(255)
                 .HasColumnName("description");
-            entity.Property(e => e.Issystem)
+            entity.Property(e => e.IsSystem)
                 .HasDefaultValue(false)
-                .HasColumnName("issystem");
+                .HasColumnName("is_system");
             entity.Property(e => e.Name)
                 .HasMaxLength(24)
                 .HasColumnName("name");
