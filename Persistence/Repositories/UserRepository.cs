@@ -39,22 +39,20 @@ public class UserRepository(UserDbContext context) : IUserRepository
 
     public async Task<User> CreateUserAsync(User user, string passwordHash, CancellationToken cancellationToken = default)
     {
-        user.UserName = user.UserName.Trim();
-        var normalizedUserName = user.UserName.ToNormalized();
-        if (string.IsNullOrWhiteSpace(normalizedUserName))
-            throw new ArgumentNullException(nameof(normalizedUserName), "Имя пользователя не может быть пустым");
-        if (string.IsNullOrWhiteSpace(passwordHash))
-            throw new ArgumentNullException(nameof(passwordHash), "Хэш пароля не может быть пустым");
-        if (!await IsUserNameFree(user.UserName, cancellationToken))
-            throw new UserNameAlreadyTaken(user.UserName);
         var newUser = new User
         {
-            UserName = user.UserName,
-            NormalizedUserName = normalizedUserName,
+            UserName = user.UserName.Trim(),
+            NormalizedUserName = user.UserName.ToNormalized()!,
             PasswordHash = passwordHash,
             TwoFactorEnabled = user.TwoFactorEnabled,
             LockoutEnd = user.LockoutEnd,
         };
+        if (string.IsNullOrWhiteSpace(newUser.NormalizedUserName))
+            throw new ArgumentNullException(nameof(newUser.NormalizedUserName), "Имя пользователя не может быть пустым");
+        if (string.IsNullOrWhiteSpace(passwordHash))
+            throw new ArgumentNullException(nameof(passwordHash), "Хэш пароля не может быть пустым");
+        if (!await IsUserNameFree(user.UserName, cancellationToken))
+            throw new UserNameAlreadyTaken(user.UserName);
         await context.Users.AddAsync(newUser, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
         return newUser;
@@ -68,7 +66,7 @@ public class UserRepository(UserDbContext context) : IUserRepository
                            throw new UserNotFound(userId);
         var normalizedUserName = user.UserName.ToNormalized();
         if (string.IsNullOrWhiteSpace(normalizedUserName))
-            throw new ArgumentNullException(nameof(normalizedUserName), "Имя пользователя не может быть пустым");
+            throw new ArgumentNullException(nameof(user.UserName), "Имя пользователя не может быть пустым");
         if (string.IsNullOrWhiteSpace(passwordHash))
             throw new ArgumentNullException(nameof(passwordHash), "Хэш пароля не может быть пустым");
         if (userToUpdate.NormalizedUserName != normalizedUserName && !await IsUserNameFree(user.UserName, cancellationToken))
