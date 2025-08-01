@@ -1,7 +1,7 @@
 using Bogus;
 using Core.Exceptions.Users;
 using Core.Extensions;
-using Core.Interfaces;
+using Core.Interfaces.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence.Context;
@@ -9,19 +9,19 @@ using Tests.Integration.Extensions;
 using Tests.Integration.MockData;
 using Tests.Integration.TestContainers.Pg;
 
-namespace Tests.Integration.RepositoryTests.UserRepositoryTests;
+namespace Tests.Integration.ServicesTests.UserServiceTests;
 
 [Collection("Postgres collection")]
 public class CreateUserTests : IAsyncLifetime
 {
     private readonly UserDbContext _context;
-    private readonly IUserRepository _userRepository;
+    private readonly IUserService _userRepository;
     private readonly Faker _faker;
     public CreateUserTests(PostgresContainerFixture fixture)
     {
         var sp = ServiceProvider.Build(fixture.ConnectionString);
         _context = sp.GetRequiredService<UserDbContext>();
-        _userRepository = sp.GetRequiredService<IUserRepository>();
+        _userRepository = sp.GetRequiredService<IUserService>();
         _faker = new Faker(Mock.Locale);
     }
     

@@ -1,6 +1,6 @@
 using Bogus;
 using Core.Entities;
-using Core.Interfaces;
+using Core.Interfaces.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence.Context;
 using Tests.Integration.Extensions;

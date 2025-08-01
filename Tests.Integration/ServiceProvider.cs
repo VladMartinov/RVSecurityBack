@@ -1,4 +1,6 @@
-using Core.Interfaces;
+using Application.Services;
+using Core.Interfaces.Repositories;
+using Core.Interfaces.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -17,6 +19,7 @@ public static class ServiceProvider
             options.UseNpgsql(postgresConnectionString)
                 .EnableSensitiveDataLogging().LogTo(Console.WriteLine, LogLevel.Information));
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserService, UserService>();
         return services.BuildServiceProvider();
     }
 }
