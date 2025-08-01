@@ -1,6 +1,6 @@
 using Core.Entities;
 
-namespace Core.Interfaces;
+namespace Core.Interfaces.Repositories;
 
 public interface IUserRepository
 {
@@ -44,24 +44,33 @@ public interface IUserRepository
     /// Создание нового пользователя.
     /// </summary>
     /// <param name="user">Объект пользователя (без Id).</param>
-    /// <param name="passwordHash">Хэш пароля пользователя.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <returns>Созданный пользователь с присвоенным Id.</returns>
-    Task<User> CreateUserAsync(User user, string passwordHash, CancellationToken cancellationToken = default);
+    /// <remarks>
+    /// Не проверяет данные на корректность.
+    /// </remarks>
+    Task<User> CreateUserAsync(User user, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Обновление существующего пользователя.
     /// </summary>
     /// <param name="user">Пользователь с обновлёнными данными.</param>
-    /// <param name="passwordHash">Новый хэш пароля.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <returns>Обновлённый пользователь.</returns>
-    Task<User> UpdateUserAsync(User user, string passwordHash, CancellationToken cancellationToken = default);
+    /// <remarks>
+    /// Не проверяет данные на корректность.
+    /// </remarks>
+    Task<User> UpdateUserAsync(User user, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Удаление пользователя по Id.
     /// </summary>
     /// <param name="id">Id пользователя.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <remarks>
+    /// Не проверяет данные на корректность.
+    /// </remarks>
     Task DeleteUserAsync(Guid id, CancellationToken cancellationToken = default);
+    
+    Task<bool> IsUserNameTakenAsync(string userName, CancellationToken cancellationToken = default);
 }

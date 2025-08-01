@@ -2,6 +2,7 @@ using Bogus;
 using Core.Entities;
 using Core.Exceptions.Users;
 using Core.Interfaces;
+using Core.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence.Context;
