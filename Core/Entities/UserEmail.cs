@@ -20,5 +20,7 @@ public partial class UserEmail
 
     public DateTime UpdatedAt { get; set; }
 
+    public Guid Id { get; set; }
+
     public virtual User User { get; set; } = null!;
 }

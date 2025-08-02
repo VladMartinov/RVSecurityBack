@@ -1,7 +1,7 @@
 using Bogus;
-using Core.Exceptions.Users;
 using Core.Extensions;
 using Core.Interfaces.Services;
+using Exceptions.Exceptions.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence.Context;

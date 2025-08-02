@@ -1,6 +1,6 @@
-using Core.Interfaces;
+using Exceptions.Interfaces;
 
-namespace Core.Exceptions;
+namespace Exceptions.Exceptions;
 
 public class BaseValuedException : Exception, IValuedException
 {

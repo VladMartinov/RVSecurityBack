@@ -103,7 +103,7 @@ public partial class UserDbContext : DbContext
 
         modelBuilder.Entity<UserEmail>(entity =>
         {
-            entity.HasKey(e => new { e.UserId, e.NormalizedEmail }).HasName("user_emails_pk");
+            entity.HasKey(e => e.Id).HasName("user_emails_pk");
 
             entity.ToTable("user_emails", "auth");
 
@@ -113,14 +113,15 @@ public partial class UserDbContext : DbContext
 
             entity.HasIndex(e => e.NormalizedEmail, "user_emails_normalized_email_uindex").IsUnique();
 
+            entity.HasIndex(e => e.UserId, "user_emails_user_id_index");
+
             entity.HasIndex(e => new { e.UserId, e.IsPrimary }, "user_emails_user_id_is_primary_uindex")
                 .IsUnique()
                 .HasFilter("(is_primary = true)");
 
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-            entity.Property(e => e.NormalizedEmail)
-                .HasMaxLength(255)
-                .HasColumnName("normalized_email");
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("gen_random_uuid()")
+                .HasColumnName("id");
             entity.Property(e => e.Confirmed)
                 .HasDefaultValue(false)
                 .HasColumnName("confirmed");
@@ -137,9 +138,13 @@ public partial class UserDbContext : DbContext
             entity.Property(e => e.IsPrimary)
                 .HasDefaultValue(false)
                 .HasColumnName("is_primary");
+            entity.Property(e => e.NormalizedEmail)
+                .HasMaxLength(255)
+                .HasColumnName("normalized_email");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.User).WithMany(p => p.UserEmails)
                 .HasForeignKey(d => d.UserId)

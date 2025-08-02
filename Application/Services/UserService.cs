@@ -1,8 +1,8 @@
 using Core.Entities;
-using Core.Exceptions.Users;
 using Core.Extensions;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
+using Exceptions.Exceptions.Users;
 
 namespace Application.Services;
 

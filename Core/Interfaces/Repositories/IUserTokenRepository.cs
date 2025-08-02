@@ -9,4 +9,6 @@ public interface IUserTokenRepository
     Task<UserToken> CreateUserTokenAsync(UserToken token, CancellationToken cancellationToken = default);
     Task<UserToken> UpdateUserTokenAsync(UserToken token, CancellationToken cancellationToken = default);
     Task DeleteUserTokenAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<bool> TokenExistsAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<bool> TokenExistsAsync(string hash, CancellationToken cancellationToken = default);
 }

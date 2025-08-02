@@ -1,4 +1,4 @@
-namespace Core.Interfaces;
+namespace Exceptions.Interfaces;
 
 public interface IValuedException
 {

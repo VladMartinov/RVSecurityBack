@@ -1,4 +1,4 @@
-namespace Core.Exceptions;
+namespace Exceptions.Exceptions;
 
 public class ConflictException : BaseValuedException
 {

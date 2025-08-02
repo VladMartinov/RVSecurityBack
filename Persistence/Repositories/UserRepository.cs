@@ -1,7 +1,7 @@
 using Core.Entities;
-using Core.Exceptions.Users;
 using Core.Extensions;
 using Core.Interfaces.Repositories;
+using Exceptions.Exceptions.Users;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Context;
 using Persistence.Extensions;
@@ -71,4 +71,7 @@ public class UserRepository(UserDbContext context) : IUserRepository
         var normalizedUserName = userName.ToNormalized();
         return await context.Users.AnyAsync(x => x.NormalizedUserName == normalizedUserName, cancellationToken);
     }
+
+    public async Task<bool> UserExists(Guid id, CancellationToken cancellationToken = default) 
+        => await context.Users.AnyAsync(x => x.Id == id, cancellationToken);
 }

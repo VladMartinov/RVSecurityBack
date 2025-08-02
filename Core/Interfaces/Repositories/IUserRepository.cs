@@ -73,4 +73,5 @@ public interface IUserRepository
     Task DeleteUserAsync(Guid id, CancellationToken cancellationToken = default);
     
     Task<bool> IsUserNameTakenAsync(string userName, CancellationToken cancellationToken = default);
+    Task<bool> UserExists(Guid id, CancellationToken cancellationToken = default);
 }

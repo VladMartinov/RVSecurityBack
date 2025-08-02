@@ -1,6 +1,6 @@
 using Core.Entities;
-using Core.Exceptions.Tokens;
 using Core.Interfaces.Repositories;
+using Exceptions.Exceptions.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Context;
 using Persistence.Extensions;
@@ -54,4 +54,10 @@ public class UserTokenRepository(UserDbContext context) : IUserTokenRepository
         context.UserTokens.Remove(userToken);
         await context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<bool> TokenExistsAsync(Guid id, CancellationToken cancellationToken = default) 
+        => await context.UserTokens.AnyAsync(x => x.Id == id, cancellationToken);
+
+    public async Task<bool> TokenExistsAsync(string hash, CancellationToken cancellationToken = default)
+        => await context.UserTokens.AnyAsync(x => x.TokenHash == hash, cancellationToken);
 }
