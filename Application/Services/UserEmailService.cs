@@ -71,7 +71,7 @@ public class UserEmailService(IUserEmailRepository emailRepository, IUserReposit
         var normalizedEmail = newEmail.ToNormalizedEmail();
 
         var isPrimaryChanged = dto.IsPrimary.HasValue && dto.IsPrimary.Value != existing.IsPrimary;
-        var newIsPrimary = isPrimaryChanged ? dto.IsPrimary!.Value : existing.IsPrimary;
+        var newIsPrimary = isPrimaryChanged && dto.IsPrimary!.Value;
 
         var emailChanged = normalizedEmail != existing.NormalizedEmail;
         await ValidateAsync(newUserId, newIsPrimary, emailChanged ? newEmail : null, cancellationToken);
@@ -87,9 +87,8 @@ public class UserEmailService(IUserEmailRepository emailRepository, IUserReposit
             existing.ConfirmedAt = DateTime.UtcNow;
         }
         else if (dto.Confirmed.HasValue)
-        {
             existing.Confirmed = dto.Confirmed.Value;
-        }
+        
 
         return await emailRepository.UpdateUserEmailAsync(existing, cancellationToken);
     }

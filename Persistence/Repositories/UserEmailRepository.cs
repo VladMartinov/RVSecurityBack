@@ -69,6 +69,7 @@ public class UserEmailRepository(UserDbContext context) : IUserEmailRepository
         existingEmail.UpdatedAt = DateTime.UtcNow;
         existingEmail.UserId = newEmail.UserId;
         existingEmail.Confirmed = newEmail.Confirmed;
+        existingEmail.ConfirmedAt = newEmail.ConfirmedAt;
         existingEmail.EmailType = newEmail.EmailType;
         existingEmail.IsPrimary = newEmail.IsPrimary;
     }
