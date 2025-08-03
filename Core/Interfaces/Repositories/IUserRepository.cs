@@ -49,7 +49,7 @@ public interface IUserRepository
     /// <remarks>
     /// Не проверяет данные на корректность.
     /// </remarks>
-    Task<User> CreateUserAsync(User user, CancellationToken cancellationToken = default);
+    Task<User> AddUserAsync(User user, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Обновление существующего пользователя.

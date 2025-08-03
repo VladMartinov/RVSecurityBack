@@ -27,7 +27,7 @@ public class UserTokenService(IUserTokenRepository userTokenRepository, IUserRep
     {
         await Validate(tokenCreationRequest, cancellationToken);
         var userToken = tokenCreationRequest.Adapt<UserToken>();
-        return await userTokenRepository.CreateUserTokenAsync(userToken, cancellationToken);
+        return await userTokenRepository.AddUserTokenAsync(userToken, cancellationToken);
     }
 
     public async Task<UserToken> UpdateUserTokenAsync(UserTokenUpdateDto tokenUpdateRequest, CancellationToken cancellationToken = default)

@@ -15,7 +15,7 @@ public interface IUserEmailRepository
         CancellationToken cancellationToken = default);
     Task<UserEmail?> GetUserPrimaryEmailAsync(Guid userId, bool track = true, CancellationToken cancellationToken = default);
 
-    Task<UserEmail> CreateUserEmailAsync(UserEmail userEmail, CancellationToken cancellationToken = default);
+    Task<UserEmail> AddUserEmailAsync(UserEmail userEmail, CancellationToken cancellationToken = default);
     Task<UserEmail> UpdateUserEmailAsync(UserEmail userEmail, CancellationToken cancellationToken = default);
     Task DeleteUserEmailAsync(Guid id, CancellationToken cancellationToken = default);
     Task<bool> IsEmailTakenAsync(string email, CancellationToken cancellationToken = default);

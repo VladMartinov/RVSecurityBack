@@ -16,6 +16,7 @@ public class UserEmailRepository(UserDbContext context) : IUserEmailRepository
     {
         var query = context.UserEmails
             .ConfigureTracking(track)
+            .OrderBy(x => x.Id)
             .Where(e => e.UserId == userId);
 
         if (offset != null)
@@ -46,7 +47,7 @@ public class UserEmailRepository(UserDbContext context) : IUserEmailRepository
     => await context.UserEmails.ConfigureTracking(track)
         .FirstOrDefaultAsync(x => x.UserId == userId && x.IsPrimary == true, cancellationToken);
 
-    public async Task<UserEmail> CreateUserEmailAsync(UserEmail userEmail, CancellationToken cancellationToken = default)
+    public async Task<UserEmail> AddUserEmailAsync(UserEmail userEmail, CancellationToken cancellationToken = default)
     {
         await context.UserEmails.AddAsync(userEmail, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);

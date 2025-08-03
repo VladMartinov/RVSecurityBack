@@ -30,7 +30,7 @@ public class UserService(IUserRepository userRepository) : IUserService
         if (await userRepository.IsUserNameTakenAsync(user.UserName, cancellationToken))
             throw new UserNameAlreadyTaken(user.UserName);
         
-        return await userRepository.CreateUserAsync(newUser, cancellationToken);
+        return await userRepository.AddUserAsync(newUser, cancellationToken);
     }
 
     public async Task<User> UpdateUserAsync(User user, string? passwordHash, CancellationToken cancellationToken = default)

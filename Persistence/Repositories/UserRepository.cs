@@ -37,7 +37,7 @@ public class UserRepository(UserDbContext context) : IUserRepository
         return userPhone?.User;
     }
 
-    public async Task<User> CreateUserAsync(User user, CancellationToken cancellationToken = default)
+    public async Task<User> AddUserAsync(User user, CancellationToken cancellationToken = default)
     {
         await context.Users.AddAsync(user, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);

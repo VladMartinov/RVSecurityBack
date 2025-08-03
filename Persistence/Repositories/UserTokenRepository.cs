@@ -15,7 +15,7 @@ public class UserTokenRepository(UserDbContext context) : IUserTokenRepository
     public async Task<UserToken?> GetTokenByHashAsync(string hash, bool track = true, CancellationToken cancellationToken = default) 
         => await context.UserTokens.ConfigureTracking(track).FirstOrDefaultAsync(x => x.TokenHash == hash, cancellationToken);
 
-    public async Task<UserToken> CreateUserTokenAsync(UserToken token, CancellationToken cancellationToken = default)
+    public async Task<UserToken> AddUserTokenAsync(UserToken token, CancellationToken cancellationToken = default)
     {
         await context.UserTokens.AddAsync(token, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
@@ -56,8 +56,8 @@ public class UserTokenRepository(UserDbContext context) : IUserTokenRepository
     }
 
     public async Task<bool> TokenExistsAsync(Guid id, CancellationToken cancellationToken = default) 
-        => await context.UserTokens.AnyAsync(x => x.Id == id, cancellationToken);
+        => await context.UserTokens.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken);
 
     public async Task<bool> TokenExistsAsync(string hash, CancellationToken cancellationToken = default)
-        => await context.UserTokens.AnyAsync(x => x.TokenHash == hash, cancellationToken);
+        => await context.UserTokens.AsNoTracking().AnyAsync(x => x.TokenHash == hash, cancellationToken);
 }

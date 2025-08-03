@@ -58,7 +58,7 @@ public class UserEmailService(IUserEmailRepository emailRepository, IUserReposit
             EmailType = emailType
         };
 
-        return await emailRepository.CreateUserEmailAsync(model, cancellationToken);
+        return await emailRepository.AddUserEmailAsync(model, cancellationToken);
     }
 
     public async Task<UserEmail> UpdateUserEmailAsync(UserEmailUpdateDto dto, CancellationToken cancellationToken = default)
