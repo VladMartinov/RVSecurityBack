@@ -86,14 +86,17 @@ public class UserEmailRepository(UserDbContext context) : IUserEmailRepository
     public async Task<bool> IsEmailTakenAsync(string email, CancellationToken cancellationToken = default)
     {
         var normalizedEmail = email.ToNormalizedEmail();
-        return await context.UserEmails.AnyAsync(x => x.NormalizedEmail == normalizedEmail, cancellationToken);
+        return await context.UserEmails.AsNoTracking()
+            .AnyAsync(x => x.NormalizedEmail == normalizedEmail, cancellationToken);
     }
 
     public async Task<int> GetUserEmailCountAsync(Guid userId, CancellationToken cancellationToken = default) 
-        => await context.UserEmails.CountAsync(x => x.UserId == userId, cancellationToken);
+        => await context.UserEmails.AsNoTracking()
+            .CountAsync(x => x.UserId == userId, cancellationToken);
 
-    public Task<bool> UserHasPrimaryEmailAsync(Guid userId, CancellationToken cancellationToken = default) 
-        => context.UserEmails.AnyAsync(x => x.UserId == userId && x.IsPrimary == true, cancellationToken);
+    public async Task<bool> UserHasPrimaryEmailAsync(Guid userId, CancellationToken cancellationToken = default) 
+        => await context.UserEmails.AsNoTracking()
+            .AnyAsync(x => x.UserId == userId && x.IsPrimary == true, cancellationToken);
 
     public async Task<UserEmailSummary?> GetUserEmailSummaryAsync(Guid userId, CancellationToken cancellationToken = default)
     {
