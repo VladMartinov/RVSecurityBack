@@ -1,7 +1,6 @@
 using Application.Services;
 using Core.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
-using Security;
 
 namespace Tests.Unit;
 

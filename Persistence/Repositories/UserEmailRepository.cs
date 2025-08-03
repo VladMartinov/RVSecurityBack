@@ -56,8 +56,7 @@ public class UserEmailRepository(UserDbContext context) : IUserEmailRepository
     public async Task<UserEmail> UpdateUserEmailAsync(UserEmail userEmail, CancellationToken cancellationToken = default)
     {
         var id = userEmail.Id;
-        var toUpdate = await GetUserEmailAsync(id, true, cancellationToken)
-                        ?? throw new UserEmailNotFoundException(id);
+        var toUpdate = await GetUserEmailAsync(id, true, cancellationToken) ?? throw new UserEmailNotFoundException(id);
         UpdateUserEmailFields(toUpdate, userEmail);
         await context.SaveChangesAsync(cancellationToken);
         return toUpdate;

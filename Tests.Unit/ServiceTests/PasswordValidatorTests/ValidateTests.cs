@@ -73,7 +73,7 @@ public class ValidateTests
     [Fact]
     public void Validate_ShouldPass_WhenPasswordIsAtMinLength()
     {
-        var password = "A1!bcdef"; // 8 chars, valid
+        var password = "A1!bcdef";
         var validator = CreateValidator();
 
         var errors = validator.Validate(password);
