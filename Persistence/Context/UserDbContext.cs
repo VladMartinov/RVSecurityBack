@@ -153,7 +153,7 @@ public partial class UserDbContext : DbContext
 
         modelBuilder.Entity<UserPhone>(entity =>
         {
-            entity.HasKey(e => new { e.UserId, e.NormalizedPhone }).HasName("user_phones_pk");
+            entity.HasKey(e => e.Id).HasName("user_phones_pk");
 
             entity.ToTable("user_phones", "auth");
 
@@ -163,10 +163,9 @@ public partial class UserDbContext : DbContext
                 .IsUnique()
                 .HasFilter("(is_primary = true)");
 
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-            entity.Property(e => e.NormalizedPhone)
-                .HasMaxLength(32)
-                .HasColumnName("normalized_phone");
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("gen_random_uuid()")
+                .HasColumnName("id");
             entity.Property(e => e.Confirmed)
                 .HasDefaultValue(false)
                 .HasColumnName("confirmed");
@@ -177,6 +176,9 @@ public partial class UserDbContext : DbContext
             entity.Property(e => e.IsPrimary)
                 .HasDefaultValue(false)
                 .HasColumnName("is_primary");
+            entity.Property(e => e.NormalizedPhone)
+                .HasMaxLength(32)
+                .HasColumnName("normalized_phone");
             entity.Property(e => e.PhoneNumber)
                 .HasMaxLength(32)
                 .HasColumnName("phone_number");
@@ -186,6 +188,7 @@ public partial class UserDbContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("updated_at");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.User).WithOne(p => p.UserPhone)
                 .HasForeignKey<UserPhone>(d => d.UserId)
