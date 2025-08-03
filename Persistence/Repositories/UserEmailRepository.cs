@@ -1,6 +1,7 @@
 using Core.Entities;
 using Core.Extensions;
 using Core.Interfaces.Repositories;
+using Core.Models;
 using Exceptions.Exceptions.Emails;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Context;
@@ -41,6 +42,10 @@ public class UserEmailRepository(UserDbContext context) : IUserEmailRepository
             .FirstOrDefaultAsync(x => x.NormalizedEmail == normalizedEmail, cancellationToken);
     }
 
+    public async Task<UserEmail?> GetUserPrimaryEmailAsync(Guid userId, bool track = true, CancellationToken cancellationToken = default)
+    => await context.UserEmails.ConfigureTracking(track)
+        .FirstOrDefaultAsync(x => x.UserId == userId && x.IsPrimary == true, cancellationToken);
+
     public async Task<UserEmail> CreateUserEmailAsync(UserEmail userEmail, CancellationToken cancellationToken = default)
     {
         await context.UserEmails.AddAsync(userEmail, cancellationToken);
@@ -61,7 +66,7 @@ public class UserEmailRepository(UserDbContext context) : IUserEmailRepository
     private void UpdateUserEmailFields(UserEmail existingEmail, UserEmail newEmail)
     {
         existingEmail.Email = newEmail.Email;
-        existingEmail.NormalizedEmail = newEmail.Email.ToNormalizedEmail()!;
+        existingEmail.NormalizedEmail = newEmail.Email.ToNormalizedEmail();
         existingEmail.UpdatedAt = DateTime.UtcNow;
         existingEmail.UserId = newEmail.UserId;
         existingEmail.Confirmed = newEmail.Confirmed;
@@ -77,4 +82,31 @@ public class UserEmailRepository(UserDbContext context) : IUserEmailRepository
         await context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<bool> IsEmailTakenAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var normalizedEmail = email.ToNormalizedEmail();
+        return await context.UserEmails.AnyAsync(x => x.NormalizedEmail == normalizedEmail, cancellationToken);
+    }
+
+    public async Task<int> GetUserEmailCountAsync(Guid userId, CancellationToken cancellationToken = default) 
+        => await context.UserEmails.CountAsync(x => x.UserId == userId, cancellationToken);
+
+    public Task<bool> UserHasPrimaryEmailAsync(Guid userId, CancellationToken cancellationToken = default) 
+        => context.UserEmails.AnyAsync(x => x.UserId == userId && x.IsPrimary == true, cancellationToken);
+
+    public async Task<UserEmailSummary?> GetUserEmailSummaryAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var summary = await context.UserEmails
+            .AsNoTracking()
+            .Where(x => x.UserId == userId)
+            .GroupBy(x => x.UserId)
+            .Select(group => new UserEmailSummary
+            {
+                UserId = group.Key,
+                EmailCount = group.Count(),
+                PrimaryEmail = group.FirstOrDefault(e => e.IsPrimary)
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+        return summary;
+    }
 }

@@ -9,11 +9,11 @@ public static partial class NormalizationExtensions
 {
     [GeneratedRegex(@"\D")]
     private static partial Regex OnlyDigitsRegex();
-    public static string? ToNormalized(this string? str) => str?.Trim().ToUpperInvariant();
-    public static string? ToNormalizedEmail(this string? email) => email?.Trim().ToLowerInvariant();
-    public static string? ToNormalizedPhoneNumber(this string? source)
+    public static string ToNormalized(this string str) => str.Trim().ToUpperInvariant();
+    public static string ToNormalizedEmail(this string email) => email.Trim().ToLowerInvariant();
+    public static string ToNormalizedPhoneNumber(this string source)
     {
-        if (string.IsNullOrWhiteSpace(source)) return null;
+        if (string.IsNullOrWhiteSpace(source)) return source;
         return OnlyDigitsRegex().Replace(source.Trim(), "");
     }
 }
