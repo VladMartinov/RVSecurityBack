@@ -55,6 +55,12 @@ public class UserRoleRepository(UserDbContext context) : IUserRoleRepository
         return await query.ToListAsync(cancellationToken);
     }
 
+    public async Task<UserRole?> GetUserRoleAsync(Guid userId, Guid roleId, bool track = true, CancellationToken cancellationToken = default)
+    {
+        return await context.UserRoles.ConfigureTracking(track)
+            .FirstOrDefaultAsync(x => x.UserId == userId && x.RoleId == roleId, cancellationToken);
+    }
+
     public async Task<bool> ExistsAsync(Guid userId, Guid roleId, CancellationToken cancellationToken = default) 
         => await context.UserRoles.AsNoTracking()
             .AnyAsync(x => x.UserId == userId && x.RoleId == roleId, cancellationToken);

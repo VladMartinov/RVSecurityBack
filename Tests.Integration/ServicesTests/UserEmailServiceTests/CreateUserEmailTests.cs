@@ -1,5 +1,6 @@
 using Bogus;
 using Core.Dtos;
+using Core.Dtos.UserEmail;
 using Core.Entities;
 using Core.Enums;
 using Core.Interfaces.Services;

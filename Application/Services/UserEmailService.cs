@@ -1,5 +1,6 @@
 using Application.Extensions;
 using Core.Dtos;
+using Core.Dtos.UserEmail;
 using Core.Entities;
 using Core.Extensions;
 using Core.Interfaces;
@@ -26,14 +27,13 @@ public class UserEmailService(IUserEmailRepository emailRepository, IUserReposit
         if (isPrimary && summary?.PrimaryEmail != null)
             throw new MoreThenOnePrimaryEmailException(summary.PrimaryEmail.Email);
 
-        if (!string.IsNullOrWhiteSpace(email))
-        {
-            if (!emailValidator.IsValidEmail(email))
-                throw new EmailIsInvalidException(email);
+        if (email == null) return;
+        
+        if (!emailValidator.IsValidEmail(email))
+            throw new EmailIsInvalidException(email);
 
-            if (await emailRepository.IsEmailTakenAsync(email, cancellationToken))
-                throw new EmailTakenException(email);
-        }
+        if (await emailRepository.IsEmailTakenAsync(email, cancellationToken))
+            throw new EmailTakenException(email);
     }
 
     public async Task<UserEmail> CreateUserEmailAsync(UserEmailCreationDto dto, CancellationToken cancellationToken = default)

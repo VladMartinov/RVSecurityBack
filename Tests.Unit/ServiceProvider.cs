@@ -1,4 +1,5 @@
 using Application.Services;
+using Application.Validators;
 using Core.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,6 +12,7 @@ public static class ServiceProvider
         var services = new ServiceCollection();
 
         services.AddSingleton<IEmailValidator, EmailValidator>();
+        services.AddSingleton<IPhoneValidator, PhoneValidator>();
         
         return services.BuildServiceProvider();
     }

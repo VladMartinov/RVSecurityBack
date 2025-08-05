@@ -1,4 +1,5 @@
 using Core.Dtos;
+using Core.Dtos.UserEmail;
 using Core.Entities;
 
 namespace Core.Interfaces.Services;

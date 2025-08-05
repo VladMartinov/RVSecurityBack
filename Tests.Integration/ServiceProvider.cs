@@ -1,4 +1,5 @@
 using Application.Services;
+using Application.Validators;
 using Core.Interfaces;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
