@@ -1,5 +1,5 @@
-using Core.Dtos;
 using Core.Dtos.Role;
+using Core.Dtos.User;
 using Core.Dtos.UserPhone;
 using Core.Dtos.UserRole;
 using Core.Dtos.UserToken;
@@ -63,5 +63,14 @@ public static class MapsterConfig
             .Map(dest => dest.UserAgent, src => src.DeviceInfo.UserAgent)
             .Map(dest => dest.Revoked, src => src.RevokeInfo.IsRevoked)
             .Map(dest => dest.RevokeReason, src => src.RevokeInfo.RevokeReason);
+    }
+
+    private static void ConfigureUserMappings()
+    {
+        TypeAdapterConfig<UserCreationDto, User>.NewConfig()
+            .Map(dest => dest.UserName, src => src.UserName)
+            .Map(dest => dest.NormalizedUserName, src => src.UserName.ToNormalized())
+            .Map(dest => dest.TwoFactorEnabled, src => src.TwoFactorEnabled)
+            .Map(dest => dest.LockoutEnd, src => src.LockoutEnd);
     }
 }

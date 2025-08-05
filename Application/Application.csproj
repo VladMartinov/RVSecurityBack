@@ -17,10 +17,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="UserManager\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <Reference Include="Mapster">
         <HintPath>..\..\..\..\.nuget\packages\mapster\7.4.0\lib\net7.0\Mapster.dll</HintPath>
       </Reference>
