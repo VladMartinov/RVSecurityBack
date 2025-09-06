@@ -1,6 +1,7 @@
 using Application.Extensions;
 using Core.Dtos.UserRole;
 using Core.Entities;
+using Core.Interfaces;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Exceptions.Exceptions.UserRoles;
@@ -9,7 +10,7 @@ using Mapster;
 namespace Application.Services;
 
 public class UserRoleService(IUserRoleRepository userRoleRepository, IRoleRepository roleRepository, 
-    IUserRepository userRepository) : IUserRoleService
+    IUserRepository userRepository, IUnitOfWork unitOfWork) : IUserRoleService
 {
     private async Task ValidateAsync(Guid userId, Guid roleId, CancellationToken cancellationToken = default)
     {
@@ -21,14 +22,17 @@ public class UserRoleService(IUserRoleRepository userRoleRepository, IRoleReposi
     {
         await ValidateAsync(dto.UserId, dto.RoleId, cancellationToken);
         var userRoleModel = dto.Adapt<UserRole>();
-        return await userRoleRepository.AddRoleToUserAsync(userRoleModel, cancellationToken);
+        await unitOfWork.AddAsync(userRoleModel, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return userRoleModel;
     }
 
     public async Task RemoveUserRole(RemoveUserRoleDto dto, CancellationToken cancellationToken = default)
     {
         await ValidateAsync(dto.UserId, dto.RoleId, cancellationToken);
-        var urExists = await userRoleRepository.ExistsAsync(dto.UserId, dto.RoleId, cancellationToken);
-        if (!urExists) throw new UserRoleNotFoundException(dto.UserId, dto.RoleId);
-        await userRoleRepository.DeleteUserRoleAsync(dto.UserId, dto.RoleId, cancellationToken);
+        var userRole = await userRoleRepository.GetUserRoleAsync(dto.UserId, dto.RoleId, true, cancellationToken)
+                       ?? throw new UserRoleNotFoundException(dto.UserId, dto.RoleId);
+        unitOfWork.Remove(userRole);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

@@ -1,4 +1,5 @@
 using Bogus;
+using Core.Dtos.User;
 using Core.Extensions;
 using Core.Interfaces.Services;
 using Exceptions.Exceptions.Users;
@@ -41,7 +42,9 @@ public class CreateUserTests : IAsyncLifetime
         var user = MockUser.GenNewUsers(1).Single();
         var passwordHash = _faker.Lorem.Letter(100);
         
-        var createdUser = await _userRepository.CreateUserAsync(user, passwordHash);
+        var dto = new UserCreationDto(user.UserName, passwordHash, user.TwoFactorEnabled, user.LockoutEnd);
+        
+        var createdUser = await _userRepository.CreateUserAsync(dto);
         var userInDb = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == createdUser.Id);
         
         Assert.NotNull(userInDb);
@@ -60,37 +63,41 @@ public class CreateUserTests : IAsyncLifetime
         var user = MockUser.GenNewUsers(1).Single();
         user.UserName = "   ";
         var passwordHash = _faker.Lorem.Letter(100);
+        var dto = new UserCreationDto(user.UserName, passwordHash, user.TwoFactorEnabled, user.LockoutEnd);
 
-        var ex = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await _userRepository.CreateUserAsync(user, passwordHash)
+        await Assert.ThrowsAsync<TooShortUserNameException>(async () =>
+            await _userRepository.CreateUserAsync(dto)
         );
-
-        Assert.Equal("NormalizedUserName", ex.ParamName);
     }
 
     [Fact]
-    public async Task CreateUser_WithEmptyPasswordHash_Throws()
+    public async Task CreateUser_WithEmptyPasswordHash_Succeeds()
     {
         var user = MockUser.GenNewUsers(1).Single();
         var emptyPasswordHash = "";
 
-        var ex = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await _userRepository.CreateUserAsync(user, emptyPasswordHash)
-        );
-
-        Assert.Equal("passwordHash", ex.ParamName);
+        var dto = new UserCreationDto(user.UserName, emptyPasswordHash, user.TwoFactorEnabled, user.LockoutEnd);
+        var us = await _userRepository.CreateUserAsync(dto);
+        
+        var userInDb = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == us.Id);
+        
+        Assert.NotNull(userInDb);
+        Assert.Equal(user.UserName, userInDb.UserName);
+        Assert.Equal(user.UserName.ToNormalized(), userInDb.NormalizedUserName);
+        Assert.Equal(emptyPasswordHash, userInDb.PasswordHash);
+        Assert.Equal(user.TwoFactorEnabled, userInDb.TwoFactorEnabled);
+        Assert.Equal(user.LockoutEnd, userInDb.LockoutEnd);
     }
 
     [Fact]
     public async Task CreateUser_WithTakenUserName_Throws()
     {
         var user = await _context.CreateUser(_faker.Lorem.Letter(100));
-        
-        var duplicate = MockUser.GenNewUsers(1).Single();
-        duplicate.UserName = user.UserName;
 
+        var dto = new UserCreationDto(user.UserName, _faker.Lorem.Letter(100), user.TwoFactorEnabled, user.LockoutEnd);
+        
         await Assert.ThrowsAsync<UserNameAlreadyTaken>(async () =>
-            await _userRepository.CreateUserAsync(duplicate, _faker.Lorem.Letter(100))
+            await _userRepository.CreateUserAsync(dto)
         );
     }
 }

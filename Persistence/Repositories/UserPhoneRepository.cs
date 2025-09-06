@@ -47,42 +47,6 @@ public class UserPhoneRepository(UserDbContext context) : IUserPhoneRepository
     => await context.UserPhones.ConfigureTracking(track)
         .FirstOrDefaultAsync(x => x.UserId == userId && x.IsPrimary == true, cancellationToken);
 
-    public async Task<UserPhone> AddUserPhoneAsync(UserPhone userPhone, CancellationToken cancellationToken = default)
-    {
-        await context.UserPhones.AddAsync(userPhone, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
-        return userPhone;
-    }
-
-    public async Task<UserPhone> UpdateUserPhoneAsync(UserPhone userPhone, CancellationToken cancellationToken = default)
-    {
-        var id = userPhone.Id;
-        var toUpdate = await GetUserPhoneAsync(id, true, cancellationToken) ?? throw new UserPhoneNotFoundException(id);
-        UpdateUserPhoneFields(toUpdate, userPhone);
-        await context.SaveChangesAsync(cancellationToken);
-        return toUpdate;
-    }
-
-    private void UpdateUserPhoneFields(UserPhone existingPhone, UserPhone newPhone)
-    {
-        existingPhone.PhoneNumber = newPhone.PhoneNumber;
-        existingPhone.NormalizedPhone = newPhone.PhoneNumber.ToNormalizedPhoneNumber();
-        existingPhone.UpdatedAt = DateTime.UtcNow;
-        existingPhone.UserId = newPhone.UserId;
-        existingPhone.Confirmed = newPhone.Confirmed;
-        existingPhone.ConfirmedAt = newPhone.ConfirmedAt;
-        existingPhone.PhoneType = newPhone.PhoneType;
-        existingPhone.IsPrimary = newPhone.IsPrimary;
-    }
-
-    public async Task DeleteUserPhoneAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        var userPhone = await GetUserPhoneAsync(id, true, cancellationToken)
-                        ?? throw new UserPhoneNotFoundException(id);
-        context.UserPhones.Remove(userPhone);
-        await context.SaveChangesAsync(cancellationToken);
-    }
-
     public async Task<bool> IsPhoneTakenAsync(string phone, CancellationToken cancellationToken = default)
     {
         var normalizedPhone = phone.ToNormalizedPhoneNumber();

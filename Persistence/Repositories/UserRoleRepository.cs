@@ -9,35 +9,6 @@ namespace Persistence.Repositories;
 
 public class UserRoleRepository(UserDbContext context) : IUserRoleRepository
 {
-    public async Task<UserRole> AddRoleToUserAsync(UserRole userRole, CancellationToken cancellationToken = default)
-    {
-        await context.UserRoles.AddAsync(userRole, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
-        return userRole;
-    }
-    
-    public async Task<IEnumerable<UserRole>> AddRoleToUserAsync(IEnumerable<UserRole> userRoles, CancellationToken cancellationToken = default)
-    {
-        var asList = userRoles.ToList();
-        
-        if (asList.Count == 0) return [];
-
-        await context.UserRoles.AddRangeAsync(asList, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
-        
-        return asList;
-    }
-
-    public async Task DeleteUserRoleAsync(Guid userId, Guid roleId, CancellationToken cancellationToken = default)
-    {
-        var userRole = await context.UserRoles
-            .FirstOrDefaultAsync(x => x.UserId == userId && x.RoleId == roleId, cancellationToken);
-        if(userRole == null)
-            throw new UserRoleNotFoundException(userId, roleId);
-        context.UserRoles.Remove(userRole);
-        await context.SaveChangesAsync(cancellationToken);
-    }
-
     public async Task<IEnumerable<UserRole>> GetUserRolesAsync(Guid userId, bool track = true, int? limit = null, int? offset = null,
         CancellationToken cancellationToken = default)
     {

@@ -1,6 +1,7 @@
 using Core.Dtos;
 using Core.Dtos.UserToken;
 using Core.Entities;
+using Core.Interfaces;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Exceptions.Exceptions.Tokens;
@@ -9,7 +10,8 @@ using Mapster;
 
 namespace Application.Services;
 
-public class UserTokenService(IUserTokenRepository userTokenRepository, IUserRepository userRepository) : IUserTokenService
+public class UserTokenService(IUserTokenRepository userTokenRepository, IUserRepository userRepository,
+    IUnitOfWork unitOfWork) : IUserTokenService
 {
     private async Task Validate(UserTokenCreationDto tokenCreationRequest, CancellationToken cancellationToken = default)
     {
@@ -28,7 +30,9 @@ public class UserTokenService(IUserTokenRepository userTokenRepository, IUserRep
     {
         await Validate(tokenCreationRequest, cancellationToken);
         var userToken = tokenCreationRequest.Adapt<UserToken>();
-        return await userTokenRepository.AddUserTokenAsync(userToken, cancellationToken);
+        await unitOfWork.AddAsync(userToken, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return userToken;
     }
 
     public async Task<UserToken> UpdateUserTokenAsync(UserTokenUpdateDto tokenUpdateRequest, CancellationToken cancellationToken = default)
@@ -42,12 +46,17 @@ public class UserTokenService(IUserTokenRepository userTokenRepository, IUserRep
         token.IpAddress = tokenUpdateRequest.DeviceInfo.IpAddress;
         token.Revoked = tokenUpdateRequest.RevokeInfo.IsRevoked;
         token.RevokeReason = tokenUpdateRequest.RevokeInfo.RevokeReason;
+        token.UpdatedAt = DateTime.UtcNow;
         
-        return await userTokenRepository.UpdateUserTokenAsync(token, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return token;
     }
 
     public async Task DeleteUserTokenAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        await userTokenRepository.DeleteUserTokenAsync(id, cancellationToken);
+        var token = await userTokenRepository.GetTokenByIdAsync(id, true, cancellationToken)
+                    ?? throw new TokenNotFoundException(id);
+        unitOfWork.Remove(token);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

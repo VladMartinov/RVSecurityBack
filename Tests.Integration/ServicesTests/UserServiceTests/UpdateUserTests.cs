@@ -1,4 +1,5 @@
 using Bogus;
+using Core.Dtos.User;
 using Core.Extensions;
 using Core.Interfaces.Services;
 using Exceptions.Exceptions.Users;
@@ -43,17 +44,16 @@ public class UpdateUserTests : IAsyncLifetime
         Assert.NotNull(user);
         
         user.UserName = _faker.Internet.UserName();
-        user.LockoutEnd = DateTime.UtcNow.AddDays(1);
         var newHash = _faker.Random.String2(100);
-        var updatedUser = await _userRepository.UpdateUserAsync(user, newHash);
+        
+        var dto = new UserUpdateDto(user.Id, user.UserName, newHash);
+        await _userRepository.UpdateUserAsync(dto);
         
         var userInDb = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == user.Id);
         Assert.NotNull(userInDb);
         Assert.Equal(user.UserName.Trim(), userInDb.UserName);
         Assert.Equal(newHash, userInDb.PasswordHash);
         Assert.Equal(userInDb.NormalizedUserName, user.UserName.ToNormalized());
-        Assert.NotNull(userInDb.LockoutEnd);
-        Assert.True(Math.Abs((userInDb.LockoutEnd.Value - user.LockoutEnd.Value).TotalMilliseconds) < 1);
     }
     
     [Fact]
@@ -61,12 +61,15 @@ public class UpdateUserTests : IAsyncLifetime
     {
         var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync();
         Assert.NotNull(user);
+        
         var secondUser = await _context.CreateUser(_faker.Lorem.Letter(100));
         var hash = _faker.Lorem.Letter(100);
         secondUser.UserName = user.UserName;
         
+        var dto = new UserUpdateDto(secondUser.Id, secondUser.UserName, hash);
+        
         await Assert.ThrowsAsync<UserNameAlreadyTaken>(() =>
-            _userRepository.UpdateUserAsync(secondUser, hash));
+            _userRepository.UpdateUserAsync(dto));
     }
     
     [Fact]
@@ -75,11 +78,10 @@ public class UpdateUserTests : IAsyncLifetime
         var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync();
         Assert.NotNull(user);
         user.UserName = " ";
-        var ex = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await _userRepository.UpdateUserAsync(user, user.PasswordHash)
+        var dto = new UserUpdateDto(user.Id, user.UserName, user.PasswordHash);
+        await Assert.ThrowsAsync<TooShortUserNameException>(async () =>
+            await _userRepository.UpdateUserAsync(dto)
         );
-
-        Assert.Equal("UserName", ex.ParamName);
     }
 
     [Fact]
@@ -87,8 +89,10 @@ public class UpdateUserTests : IAsyncLifetime
     {
         var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync();
         Assert.NotNull(user);
-        var updatedUser = await _userRepository.UpdateUserAsync(user, "");
+        
+        var dto = new UserUpdateDto(user.Id, user.UserName, "");
+        var updatedUser = await _userRepository.UpdateUserAsync(dto);
 
-        Assert.Equal(user.PasswordHash, updatedUser.PasswordHash);
+        Assert.Equal("", updatedUser.PasswordHash);
     }
 }

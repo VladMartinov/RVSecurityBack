@@ -7,6 +7,7 @@ using Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Persistence;
 using Persistence.Context;
 using Persistence.Repositories;
 
@@ -30,6 +31,7 @@ public static class ServiceProvider
         services.AddScoped<IEmailValidator, EmailValidator>();
         services.AddScoped<IUserEmailService, UserEmailService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         return services.BuildServiceProvider();
     }
 }

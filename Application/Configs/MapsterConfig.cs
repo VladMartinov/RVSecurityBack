@@ -17,6 +17,7 @@ public static class MapsterConfig
         ConfigureUserRoleMappings();
         ConfigureUserPhoneMappings();
         ConfigureUserTokenMappings();
+        ConfigureUserMappings();
     }
 
     private static void ConfigureRoleMappings()

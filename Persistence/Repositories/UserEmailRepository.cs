@@ -46,43 +46,7 @@ public class UserEmailRepository(UserDbContext context) : IUserEmailRepository
     public async Task<UserEmail?> GetUserPrimaryEmailAsync(Guid userId, bool track = true, CancellationToken cancellationToken = default)
     => await context.UserEmails.ConfigureTracking(track)
         .FirstOrDefaultAsync(x => x.UserId == userId && x.IsPrimary == true, cancellationToken);
-
-    public async Task<UserEmail> AddUserEmailAsync(UserEmail userEmail, CancellationToken cancellationToken = default)
-    {
-        await context.UserEmails.AddAsync(userEmail, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
-        return userEmail;
-    }
-
-    public async Task<UserEmail> UpdateUserEmailAsync(UserEmail userEmail, CancellationToken cancellationToken = default)
-    {
-        var id = userEmail.Id;
-        var toUpdate = await GetUserEmailAsync(id, true, cancellationToken) ?? throw new UserEmailNotFoundException(id);
-        UpdateUserEmailFields(toUpdate, userEmail);
-        await context.SaveChangesAsync(cancellationToken);
-        return toUpdate;
-    }
-
-    private void UpdateUserEmailFields(UserEmail existingEmail, UserEmail newEmail)
-    {
-        existingEmail.Email = newEmail.Email;
-        existingEmail.NormalizedEmail = newEmail.Email.ToNormalizedEmail();
-        existingEmail.UpdatedAt = DateTime.UtcNow;
-        existingEmail.UserId = newEmail.UserId;
-        existingEmail.Confirmed = newEmail.Confirmed;
-        existingEmail.ConfirmedAt = newEmail.ConfirmedAt;
-        existingEmail.EmailType = newEmail.EmailType;
-        existingEmail.IsPrimary = newEmail.IsPrimary;
-    }
-
-    public async Task DeleteUserEmailAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        var userEmail = await GetUserEmailAsync(id, true, cancellationToken)
-                        ?? throw new UserEmailNotFoundException(id);
-        context.UserEmails.Remove(userEmail);
-        await context.SaveChangesAsync(cancellationToken);
-    }
-
+    
     public async Task<bool> IsEmailTakenAsync(string email, CancellationToken cancellationToken = default)
     {
         var normalizedEmail = email.ToNormalizedEmail();

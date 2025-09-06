@@ -1,6 +1,7 @@
 using Core.Dtos.Role;
 using Core.Entities;
 using Core.Extensions;
+using Core.Interfaces;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Exceptions.Exceptions.Roles;
@@ -8,7 +9,7 @@ using Mapster;
 
 namespace Application.Services;
 
-public class RoleService(IRoleRepository roleRepository) : IRoleService
+public class RoleService(IRoleRepository roleRepository, IUnitOfWork unitOfWork) : IRoleService
 {
     private async Task ValidateNameAsync(string? name, CancellationToken cancellationToken = default)
     {
@@ -27,7 +28,9 @@ public class RoleService(IRoleRepository roleRepository) : IRoleService
     {
         var roleModel = dto.Adapt<Role>();
         await ValidateNameAsync(roleModel.Name, cancellationToken);
-        return await roleRepository.AddRoleAsync(roleModel, cancellationToken);
+        await unitOfWork.AddAsync(roleModel, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return roleModel;
     }
 
     public async Task<Role> UpdateRoleAsync(RoleUpdateDto dto, CancellationToken cancellationToken = default)
@@ -51,7 +54,9 @@ public class RoleService(IRoleRepository roleRepository) : IRoleService
         
         existingRole.Description = dto.Description;
         existingRole.IsSystem = dto.IsSystem ?? existingRole.IsSystem;
-        return await roleRepository.UpdateRoleAsync(existingRole, cancellationToken);
+        existingRole.UpdatedAt = DateTime.UtcNow;
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return existingRole;
     }
 
     public async Task DeleteRoleAsync(Guid id, CancellationToken cancellationToken = default)
@@ -61,6 +66,7 @@ public class RoleService(IRoleRepository roleRepository) : IRoleService
             throw new RoleNotFoundException(id);
         if (role.IsSystem)
             throw new UnableRemoveSystemRoleException(id, role.Name);
-        await roleRepository.DeleteRoleAsync(id, cancellationToken);
+        unitOfWork.Remove(role);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

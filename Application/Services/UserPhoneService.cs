@@ -12,7 +12,7 @@ using Mapster;
 namespace Application.Services;
 
 public class UserPhoneService(IPhoneValidator phoneValidator, IUserPhoneRepository userPhoneRepository, 
-    IUserRepository userRepository, UserPhoneOptions phoneOptions) : IUserPhoneService
+    IUserRepository userRepository, IUnitOfWork unitOfWork, UserPhoneOptions phoneOptions) : IUserPhoneService
 {
     private async Task ValidateAsync(Guid userId, bool isPrimary, string? phone, CancellationToken cancellationToken = default)
     {
@@ -38,7 +38,9 @@ public class UserPhoneService(IPhoneValidator phoneValidator, IUserPhoneReposito
     {
         var userPhoneModel = dto.Adapt<UserPhone>();
         await ValidateAsync(userPhoneModel.UserId, userPhoneModel.IsPrimary, userPhoneModel.PhoneNumber, cancellationToken);
-        return await userPhoneRepository.AddUserPhoneAsync(userPhoneModel, cancellationToken);
+        await unitOfWork.AddAsync(userPhoneModel, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return userPhoneModel;
     }
 
     public async Task<UserPhone> UpdateUserPhoneAsync(UserPhoneUpdateDto dto, CancellationToken cancellationToken = default)
@@ -70,12 +72,17 @@ public class UserPhoneService(IPhoneValidator phoneValidator, IUserPhoneReposito
         else if (dto.Confirmed.HasValue)
             existing.Confirmed = dto.Confirmed.Value;
         
+        existing.UpdatedAt = DateTime.UtcNow;
 
-        return await userPhoneRepository.UpdateUserPhoneAsync(existing, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return existing;
     }
 
     public async Task DeleteUserPhoneAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        await userPhoneRepository.DeleteUserPhoneAsync(id, cancellationToken);
+        var userPhone = await userPhoneRepository.GetUserPhoneAsync(id, true, cancellationToken)
+                        ?? throw new UserPhoneNotFoundException(id);
+        unitOfWork.Remove(userPhone);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

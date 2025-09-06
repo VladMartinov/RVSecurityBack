@@ -16,10 +16,7 @@ public interface IUserPhoneRepository
 
     Task<UserPhone?> GetUserPrimaryPhoneAsync(Guid userId, bool track = true,
         CancellationToken cancellationToken = default);
-
-    Task<UserPhone> AddUserPhoneAsync(UserPhone userPhone, CancellationToken cancellationToken = default);
-    Task<UserPhone> UpdateUserPhoneAsync(UserPhone userPhone, CancellationToken cancellationToken = default);
-    Task DeleteUserPhoneAsync(Guid id, CancellationToken cancellationToken = default);
+    
     Task<bool> IsPhoneTakenAsync(string phone, CancellationToken cancellationToken = default);
     Task<int> GetUserPhoneCountAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<bool> UserHasPrimaryPhoneAsync(Guid userId, CancellationToken cancellationToken = default);

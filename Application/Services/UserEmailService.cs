@@ -12,7 +12,7 @@ using Exceptions.Exceptions.Emails;
 namespace Application.Services;
 
 public class UserEmailService(IUserEmailRepository emailRepository, IUserRepository userRepository, 
-    UserEmailOptions emailOptions, IEmailValidator emailValidator) : IUserEmailService
+    UserEmailOptions emailOptions, IEmailValidator emailValidator, IUnitOfWork unitOfWork) : IUserEmailService
 {
     private async Task ValidateAsync(Guid userId, bool isPrimary, string? email = null, CancellationToken cancellationToken = default)
     {
@@ -57,13 +57,14 @@ public class UserEmailService(IUserEmailRepository emailRepository, IUserReposit
             UserId = userId,
             EmailType = emailType
         };
-
-        return await emailRepository.AddUserEmailAsync(model, cancellationToken);
+        await unitOfWork.AddAsync(model, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return model;
     }
 
     public async Task<UserEmail> UpdateUserEmailAsync(UserEmailUpdateDto dto, CancellationToken cancellationToken = default)
     {
-        var existing = await emailRepository.GetUserEmailAsync(dto.Id, false, cancellationToken)
+        var existing = await emailRepository.GetUserEmailAsync(dto.Id, true, cancellationToken)
                        ?? throw new UserEmailNotFoundException(dto.Id);
 
         var newUserId = dto.UserId ?? existing.UserId;
@@ -89,12 +90,15 @@ public class UserEmailService(IUserEmailRepository emailRepository, IUserReposit
         else if (dto.Confirmed.HasValue)
             existing.Confirmed = dto.Confirmed.Value;
         
-
-        return await emailRepository.UpdateUserEmailAsync(existing, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return existing;
     }
 
     public async Task DeleteUserEmailAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        await emailRepository.DeleteUserEmailAsync(id, cancellationToken);
+        var userEmail = await emailRepository.GetUserEmailAsync(id, true, cancellationToken)
+                        ?? throw new UserEmailNotFoundException(id);
+        unitOfWork.Remove(userEmail);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }
