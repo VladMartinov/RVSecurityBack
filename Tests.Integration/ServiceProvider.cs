@@ -1,3 +1,4 @@
+using Application.Configs;
 using Application.Services;
 using Application.Validators;
 using Core.Interfaces;
@@ -32,6 +33,7 @@ public static class ServiceProvider
         services.AddScoped<IUserEmailService, UserEmailService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        MapsterConfig.Configure();
         return services.BuildServiceProvider();
     }
 }

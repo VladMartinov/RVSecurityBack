@@ -1,4 +1,3 @@
-using Core.Dtos.User;
 using Core.Entities;
 
 namespace Core.Interfaces.Services;
@@ -15,16 +14,14 @@ public interface IUserService
     /// <summary>
     /// Создание нового пользователя.
     /// </summary>
-    /// <param name="dto"></param>
+    /// <param name="passwordHash"></param>
+    /// <param name="user"></param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <returns>Созданный пользователь с присвоенным Id.</returns>
-    Task<User> CreateUserAsync(UserCreationDto dto, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Обновление существующего пользователя.
-    /// </summary>
-    /// <param name="dto"></param>
-    /// <param name="cancellationToken">Токен отмены операции.</param>
-    /// <returns>Обновлённый пользователь.</returns>
-    Task<User> UpdateUserAsync(UserUpdateDto dto, CancellationToken cancellationToken = default);
+    Task<User> CreateUserAsync(User user, string passwordHash, CancellationToken cancellationToken = default);
+    Task<User> ChangePasswordHashAsync(Guid userId, string passwordHash, CancellationToken cancellationToken = default);
+    Task<User> ChangeUserNameAsync(Guid userId, string userName, CancellationToken cancellationToken = default);
+    Task<User> ChangeLockoutEnd(Guid userId, DateTime? lockoutEnd, CancellationToken cancellationToken = default);
+    Task<User> ChangeTwoFactorEnabled(Guid userId, bool twoFactorEnabled, CancellationToken cancellationToken = default);
+    Task<User> AccessFailedAsync(Guid userId, CancellationToken cancellationToken = default);
 }

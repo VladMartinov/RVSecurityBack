@@ -1,5 +1,4 @@
 using Bogus;
-using Core.Dtos.User;
 using Core.Extensions;
 using Core.Interfaces.Services;
 using Exceptions.Exceptions.Users;
@@ -42,9 +41,7 @@ public class CreateUserTests : IAsyncLifetime
         var user = MockUser.GenNewUsers(1).Single();
         var passwordHash = _faker.Lorem.Letter(100);
         
-        var dto = new UserCreationDto(user.UserName, passwordHash, user.TwoFactorEnabled, user.LockoutEnd);
-        
-        var createdUser = await _userRepository.CreateUserAsync(dto);
+        var createdUser = await _userRepository.CreateUserAsync(user, passwordHash);
         var userInDb = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == createdUser.Id);
         
         Assert.NotNull(userInDb);
@@ -63,10 +60,9 @@ public class CreateUserTests : IAsyncLifetime
         var user = MockUser.GenNewUsers(1).Single();
         user.UserName = "   ";
         var passwordHash = _faker.Lorem.Letter(100);
-        var dto = new UserCreationDto(user.UserName, passwordHash, user.TwoFactorEnabled, user.LockoutEnd);
 
         await Assert.ThrowsAsync<TooShortUserNameException>(async () =>
-            await _userRepository.CreateUserAsync(dto)
+            await _userRepository.CreateUserAsync(user, passwordHash)
         );
     }
 
@@ -76,8 +72,7 @@ public class CreateUserTests : IAsyncLifetime
         var user = MockUser.GenNewUsers(1).Single();
         var emptyPasswordHash = "";
 
-        var dto = new UserCreationDto(user.UserName, emptyPasswordHash, user.TwoFactorEnabled, user.LockoutEnd);
-        var us = await _userRepository.CreateUserAsync(dto);
+        var us = await _userRepository.CreateUserAsync(user, emptyPasswordHash);
         
         var userInDb = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == us.Id);
         
@@ -86,7 +81,6 @@ public class CreateUserTests : IAsyncLifetime
         Assert.Equal(user.UserName.ToNormalized(), userInDb.NormalizedUserName);
         Assert.Equal(emptyPasswordHash, userInDb.PasswordHash);
         Assert.Equal(user.TwoFactorEnabled, userInDb.TwoFactorEnabled);
-        Assert.Equal(user.LockoutEnd, userInDb.LockoutEnd);
     }
 
     [Fact]
@@ -94,10 +88,8 @@ public class CreateUserTests : IAsyncLifetime
     {
         var user = await _context.CreateUser(_faker.Lorem.Letter(100));
 
-        var dto = new UserCreationDto(user.UserName, _faker.Lorem.Letter(100), user.TwoFactorEnabled, user.LockoutEnd);
-        
         await Assert.ThrowsAsync<UserNameAlreadyTaken>(async () =>
-            await _userRepository.CreateUserAsync(dto)
+            await _userRepository.CreateUserAsync(user, _faker.Lorem.Letter(100))
         );
     }
 }

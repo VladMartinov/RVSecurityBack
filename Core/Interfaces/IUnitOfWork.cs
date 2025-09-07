@@ -9,4 +9,7 @@ public interface IUnitOfWork
     void Remove<T>(T entity);
     void RemoveRange<T>(IEnumerable<T> entities);
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
+    Task StartTransactionAsync(CancellationToken cancellationToken = default);
+    Task CommitTransactionAsync(CancellationToken cancellationToken = default);
+    Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
 }

@@ -1,5 +1,4 @@
 using Application.Extensions;
-using Core.Dtos.User;
 using Core.Entities;
 using Core.Extensions;
 using Core.Interfaces;
@@ -33,43 +32,50 @@ public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork)
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<User> CreateUserAsync(UserCreationDto dto, CancellationToken cancellationToken = default)
+    public async Task<User> CreateUserAsync(User user, string passwordHash, CancellationToken cancellationToken = default)
     {
-        var newUser = dto.Adapt<User>();
-        newUser.PasswordHash = dto.PasswordHash;
-        newUser.NormalizedUserName = dto.UserName.ToNormalized();
-
+        var newUser = user.Adapt<User>();
+        newUser.NormalizedUserName = newUser.UserName.ToNormalized();
+        newUser.PasswordHash = passwordHash;
+        
         await ValidateAsync(null, newUser.UserName, cancellationToken);
         await unitOfWork.AddAsync(newUser, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return newUser;
     }
 
-    public async Task<User> UpdateUserAsync(UserUpdateDto dto, CancellationToken cancellationToken = default)
+    public async Task<User> ChangePasswordHashAsync(Guid userId, string passwordHash, CancellationToken cancellationToken = default)
+        => await UpdateUserAsync(userId, u => u.PasswordHash = passwordHash, cancellationToken);
+    
+
+    public async Task<User> ChangeUserNameAsync(Guid userId, string userName, CancellationToken cancellationToken = default)
     {
-        var userName = dto.UserName?.Trim();
-        var normalizedUserName = userName?.ToNormalized();
-        
-        var userToUpdate = await userRepository.GetUserByIdAsync(dto.Id, true, cancellationToken)
-                           ?? throw new UserNotFound(dto.Id);
-
-        var userNameChanged = userName != null && userToUpdate.NormalizedUserName != normalizedUserName;
-        userName ??= "";
-        var passwordHash = dto.PasswordHash ?? userToUpdate.PasswordHash;
-        
-        await ValidateAsync(dto.Id, userNameChanged ? userName : null, cancellationToken);
-        
-        userToUpdate.PasswordHash = passwordHash;
-
-        if (userNameChanged)
-        {
-            userToUpdate.UserName = userName;
-            userToUpdate.NormalizedUserName = normalizedUserName!;
-        }
-        
-        userToUpdate.UpdatedAt = DateTime.UtcNow;
-        
+        var user = await userRepository.GetUserByIdAsync(userId, true, cancellationToken)
+                   ?? throw new UserNotFound(userId);
+        userName = userName.Trim();
+        var normalizedUserName = userName.ToNormalized();
+        await ValidateAsync(null, userName, cancellationToken);
+        user.UserName = userName;
+        user.NormalizedUserName = normalizedUserName;
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return userToUpdate;
+        return user;
+    }
+
+    public async Task<User> ChangeLockoutEnd(Guid userId, DateTime? lockoutEnd, CancellationToken cancellationToken = default)
+        => await UpdateUserAsync(userId, u => u.LockoutEnd = lockoutEnd, cancellationToken);
+
+    public async Task<User> ChangeTwoFactorEnabled(Guid userId, bool twoFactorEnabled, CancellationToken cancellationToken = default)
+        => await UpdateUserAsync(userId, u => u.TwoFactorEnabled = twoFactorEnabled, cancellationToken);
+
+    public async Task<User> AccessFailedAsync(Guid userId, CancellationToken cancellationToken = default)
+        => await UpdateUserAsync(userId, u => u.AccessFailedCount+=1, cancellationToken);
+    
+    private async Task<User> UpdateUserAsync(Guid userId, Action<User> update, CancellationToken cancellationToken)
+    {
+        var user = await userRepository.GetUserByIdAsync(userId, true, cancellationToken)
+                   ?? throw new UserNotFound(userId);
+        update(user);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return user;
     }
 }

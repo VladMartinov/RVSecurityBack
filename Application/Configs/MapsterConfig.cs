@@ -1,7 +1,5 @@
 using Core.Dtos.Role;
-using Core.Dtos.User;
 using Core.Dtos.UserPhone;
-using Core.Dtos.UserRole;
 using Core.Dtos.UserToken;
 using Core.Entities;
 using Core.Extensions;
@@ -14,10 +12,23 @@ public static class MapsterConfig
     public static void Configure()
     {
         ConfigureRoleMappings();
-        ConfigureUserRoleMappings();
         ConfigureUserPhoneMappings();
         ConfigureUserTokenMappings();
         ConfigureUserMappings();
+    }
+
+    private static void ConfigureUserMappings()
+    {
+        TypeAdapterConfig<User, User>.NewConfig()
+            .IgnoreNonMapped(true)
+            .Map(dest => dest.UserName, src => src.UserName)
+            .Map(dest => dest.PasswordHash, src => src.PasswordHash)
+            .Map(dest => dest.Id, src => src.Id)
+            .Map(dest => dest.NormalizedUserName, src => src.NormalizedUserName)
+            .Map(dest => dest.TwoFactorEnabled, src => src.TwoFactorEnabled)
+            .Map(dest => dest.LockoutEnd, src => src.LockoutEnd)
+            .Map(dest => dest.LastLoginAt, src => src.LastLoginAt)
+            .Map(dest => dest.AccessFailedCount, src => src.AccessFailedCount);
     }
 
     private static void ConfigureRoleMappings()
@@ -28,14 +39,6 @@ public static class MapsterConfig
             .Map(dest => dest.Name, src => src.Name.Trim())
             .Map(dest => dest.NormalizedName, src => src.Name.ToNormalized())
             .Map(dest => dest.IsSystem, src => src.IsSystem);
-    }
-
-    private static void ConfigureUserRoleMappings()
-    {
-        TypeAdapterConfig<SetUserRoleDto, UserRole>.NewConfig()
-            .Map(dest => dest.UserId, src => src.UserId)
-            .Map(dest => dest.RoleId, src => src.RoleId)
-            .Map(dest => dest.AssignedAt, src => DateTime.UtcNow);
     }
 
     private static void ConfigureUserPhoneMappings()
@@ -64,14 +67,5 @@ public static class MapsterConfig
             .Map(dest => dest.UserAgent, src => src.DeviceInfo.UserAgent)
             .Map(dest => dest.Revoked, src => src.RevokeInfo.IsRevoked)
             .Map(dest => dest.RevokeReason, src => src.RevokeInfo.RevokeReason);
-    }
-
-    private static void ConfigureUserMappings()
-    {
-        TypeAdapterConfig<UserCreationDto, User>.NewConfig()
-            .Map(dest => dest.UserName, src => src.UserName)
-            .Map(dest => dest.NormalizedUserName, src => src.UserName.ToNormalized())
-            .Map(dest => dest.TwoFactorEnabled, src => src.TwoFactorEnabled)
-            .Map(dest => dest.LockoutEnd, src => src.LockoutEnd);
     }
 }

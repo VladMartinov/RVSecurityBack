@@ -10,6 +10,29 @@ public class UnitOfWork(UserDbContext context) : IUnitOfWork
         await context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task StartTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        await context.Database.BeginTransactionAsync(cancellationToken);
+    }
+
+    public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        var transaction = context.Database.CurrentTransaction;
+        if (transaction == null)
+            throw new NullReferenceException("Transaction cannot be null. You should start transaction before commiting transaction.");
+        await transaction.CommitAsync(cancellationToken);
+        await transaction.DisposeAsync();
+    }
+
+    public async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        var transaction = context.Database.CurrentTransaction;
+        if (transaction == null)
+            throw new NullReferenceException("Transaction cannot be null. You should start transaction before transaction rollback.");
+        await transaction.RollbackAsync(cancellationToken);
+        await transaction.DisposeAsync();
+    }
+
     public async Task AddAsync<T>(T entity, CancellationToken cancellationToken = default)
     {
         await context.AddAsync(entity ?? throw new ArgumentNullException(nameof(entity)), cancellationToken);
