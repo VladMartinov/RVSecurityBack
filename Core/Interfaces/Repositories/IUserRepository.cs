@@ -40,37 +40,6 @@ public interface IUserRepository
     /// <returns>Пользователь или null.</returns>
     Task<User?> GetUserByPhoneAsync(string phoneNumber, bool track = true, CancellationToken cancellationToken = default);
     
-    /// <summary>
-    /// Создание нового пользователя.
-    /// </summary>
-    /// <param name="user">Объект пользователя (без Id).</param>
-    /// <param name="cancellationToken">Токен отмены операции.</param>
-    /// <returns>Созданный пользователь с присвоенным Id.</returns>
-    /// <remarks>
-    /// Не проверяет данные на корректность.
-    /// </remarks>
-    Task<User> CreateUserAsync(User user, CancellationToken cancellationToken = default);
-    
-    /// <summary>
-    /// Обновление существующего пользователя.
-    /// </summary>
-    /// <param name="user">Пользователь с обновлёнными данными.</param>
-    /// <param name="cancellationToken">Токен отмены операции.</param>
-    /// <returns>Обновлённый пользователь.</returns>
-    /// <remarks>
-    /// Не проверяет данные на корректность.
-    /// </remarks>
-    Task<User> UpdateUserAsync(User user, CancellationToken cancellationToken = default);
-    
-    /// <summary>
-    /// Удаление пользователя по Id.
-    /// </summary>
-    /// <param name="id">Id пользователя.</param>
-    /// <param name="cancellationToken">Токен отмены операции.</param>
-    /// <remarks>
-    /// Не проверяет данные на корректность.
-    /// </remarks>
-    Task DeleteUserAsync(Guid id, CancellationToken cancellationToken = default);
-    
     Task<bool> IsUserNameTakenAsync(string userName, CancellationToken cancellationToken = default);
+    Task<bool> UserExists(Guid id, CancellationToken cancellationToken = default);
 }

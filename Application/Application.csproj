@@ -8,15 +8,19 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Core\Core.csproj" />
+      <ProjectReference Include="..\Exceptions\Exceptions.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Mapster" Version="7.4.0" />
       <PackageReference Include="MediatR" Version="13.0.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="UserManager\" />
+      <Reference Include="Mapster">
+        <HintPath>..\..\..\..\.nuget\packages\mapster\7.4.0\lib\net7.0\Mapster.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

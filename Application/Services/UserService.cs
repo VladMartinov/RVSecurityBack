@@ -1,58 +1,77 @@
+using Application.Extensions;
 using Core.Entities;
-using Core.Exceptions.Users;
 using Core.Extensions;
+using Core.Interfaces;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
+using Exceptions.Exceptions.Users;
+using Mapster;
 
 namespace Application.Services;
 
-public class UserService(IUserRepository userRepository) : IUserService
+public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork) : IUserService
 {
+    private async Task ValidateAsync(Guid? userId, string? userName, CancellationToken cancellationToken = default)
+    {
+        if (userId != null)
+            await userRepository.EnsureUserExists(userId.Value, cancellationToken);
+        if (userName != null)
+        {
+            var trimmedUserName = userName.Trim();
+            if (trimmedUserName == string.Empty || trimmedUserName.Length < 3)
+                throw new TooShortUserNameException(trimmedUserName, trimmedUserName.Length, 3);
+            if (await userRepository.IsUserNameTakenAsync(trimmedUserName, cancellationToken))
+                throw new UserNameAlreadyTaken(trimmedUserName);
+        }
+    }
     public async Task DeleteUserAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        await userRepository.DeleteUserAsync(id, cancellationToken);
+        var user = await userRepository.GetUserByIdAsync(id, true, cancellationToken)
+                           ?? throw new UserNotFound(id);
+        unitOfWork.Remove(user);
     }
 
     public async Task<User> CreateUserAsync(User user, string passwordHash, CancellationToken cancellationToken = default)
     {
-        var newUser = new User
-        {
-            UserName = user.UserName.Trim(),
-            NormalizedUserName = user.UserName.ToNormalized()!,
-            PasswordHash = passwordHash,
-            TwoFactorEnabled = user.TwoFactorEnabled,
-            LockoutEnd = user.LockoutEnd,
-        };
-        if (string.IsNullOrWhiteSpace(newUser.NormalizedUserName))
-            throw new ArgumentNullException(nameof(newUser.NormalizedUserName), "Имя пользователя не может быть пустым");
-        if (string.IsNullOrWhiteSpace(passwordHash))
-            throw new ArgumentNullException(nameof(passwordHash), "Хэш пароля не может быть пустым");
-        if (await userRepository.IsUserNameTakenAsync(user.UserName, cancellationToken))
-            throw new UserNameAlreadyTaken(user.UserName);
+        var newUser = user.Adapt<User>();
+        newUser.NormalizedUserName = newUser.UserName.ToNormalized();
+        newUser.PasswordHash = passwordHash;
         
-        return await userRepository.CreateUserAsync(newUser, cancellationToken);
+        await ValidateAsync(null, newUser.UserName, cancellationToken);
+        await unitOfWork.AddAsync(newUser, cancellationToken);
+        return newUser;
     }
 
-    public async Task<User> UpdateUserAsync(User user, string? passwordHash, CancellationToken cancellationToken = default)
+    public async Task<User> ChangePasswordHashAsync(Guid userId, string passwordHash, CancellationToken cancellationToken = default)
+        => await UpdateUserAsync(userId, u => u.PasswordHash = passwordHash, cancellationToken);
+    
+
+    public async Task<User> ChangeUserNameAsync(Guid userId, string userName, CancellationToken cancellationToken = default)
     {
-        user.UserName = user.UserName.Trim();
-        var normalizedUserName = user.UserName.ToNormalized();
+        var user = await userRepository.GetUserByIdAsync(userId, true, cancellationToken)
+                   ?? throw new UserNotFound(userId);
+        userName = userName.Trim();
+        var normalizedUserName = userName.ToNormalized();
+        await ValidateAsync(null, userName, cancellationToken);
+        user.UserName = userName;
+        user.NormalizedUserName = normalizedUserName;
+        return user;
+    }
 
-        if (string.IsNullOrWhiteSpace(normalizedUserName))
-            throw new ArgumentNullException(nameof(user.UserName), "Имя пользователя не может быть пустым");
-        
-        var userToUpdate = await userRepository.GetUserByIdAsync(user.Id, true, cancellationToken)
-                           ?? throw new UserNotFound(user.Id);
+    public async Task<User> ChangeLockoutEnd(Guid userId, DateTime? lockoutEnd, CancellationToken cancellationToken = default)
+        => await UpdateUserAsync(userId, u => u.LockoutEnd = lockoutEnd, cancellationToken);
 
-        if (userToUpdate.NormalizedUserName != normalizedUserName 
-            && await userRepository.IsUserNameTakenAsync(user.UserName, cancellationToken))
-            throw new UserNameAlreadyTaken(user.UserName);
-        
-        userToUpdate.UserName = user.UserName;
-        userToUpdate.NormalizedUserName = normalizedUserName;
-        userToUpdate.PasswordHash = string.IsNullOrWhiteSpace(passwordHash) ? userToUpdate.PasswordHash : passwordHash;
-        userToUpdate.LockoutEnd = user.LockoutEnd;
+    public async Task<User> ChangeTwoFactorEnabled(Guid userId, bool twoFactorEnabled, CancellationToken cancellationToken = default)
+        => await UpdateUserAsync(userId, u => u.TwoFactorEnabled = twoFactorEnabled, cancellationToken);
 
-        return await userRepository.UpdateUserAsync(userToUpdate, cancellationToken);
+    public async Task<User> AccessFailedAsync(Guid userId, CancellationToken cancellationToken = default)
+        => await UpdateUserAsync(userId, u => u.AccessFailedCount+=1, cancellationToken);
+    
+    private async Task<User> UpdateUserAsync(Guid userId, Action<User> update, CancellationToken cancellationToken)
+    {
+        var user = await userRepository.GetUserByIdAsync(userId, true, cancellationToken)
+                   ?? throw new UserNotFound(userId);
+        update(user);
+        return user;
     }
 }
