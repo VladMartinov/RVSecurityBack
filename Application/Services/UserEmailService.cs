@@ -57,8 +57,6 @@ public class UserEmailService(IUserEmailRepository emailRepository, IUserReposit
             UserId = userId,
             EmailType = emailType
         };
-        await unitOfWork.AddAsync(model, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
         return model;
     }
 
@@ -90,7 +88,6 @@ public class UserEmailService(IUserEmailRepository emailRepository, IUserReposit
         else if (dto.Confirmed.HasValue)
             existing.Confirmed = dto.Confirmed.Value;
         
-        await unitOfWork.SaveChangesAsync(cancellationToken);
         return existing;
     }
 
@@ -99,6 +96,5 @@ public class UserEmailService(IUserEmailRepository emailRepository, IUserReposit
         var userEmail = await emailRepository.GetUserEmailAsync(id, true, cancellationToken)
                         ?? throw new UserEmailNotFoundException(id);
         unitOfWork.Remove(userEmail);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

@@ -28,8 +28,6 @@ public class RoleService(IRoleRepository roleRepository, IUnitOfWork unitOfWork)
     {
         var roleModel = dto.Adapt<Role>();
         await ValidateNameAsync(roleModel.Name, cancellationToken);
-        await unitOfWork.AddAsync(roleModel, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
         return roleModel;
     }
 
@@ -55,7 +53,6 @@ public class RoleService(IRoleRepository roleRepository, IUnitOfWork unitOfWork)
         existingRole.Description = dto.Description;
         existingRole.IsSystem = dto.IsSystem ?? existingRole.IsSystem;
         existingRole.UpdatedAt = DateTime.UtcNow;
-        await unitOfWork.SaveChangesAsync(cancellationToken);
         return existingRole;
     }
 
@@ -67,6 +64,5 @@ public class RoleService(IRoleRepository roleRepository, IUnitOfWork unitOfWork)
         if (role.IsSystem)
             throw new UnableRemoveSystemRoleException(id, role.Name);
         unitOfWork.Remove(role);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

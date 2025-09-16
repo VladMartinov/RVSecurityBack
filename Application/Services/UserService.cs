@@ -29,7 +29,6 @@ public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork)
         var user = await userRepository.GetUserByIdAsync(id, true, cancellationToken)
                            ?? throw new UserNotFound(id);
         unitOfWork.Remove(user);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<User> CreateUserAsync(User user, string passwordHash, CancellationToken cancellationToken = default)
@@ -40,7 +39,6 @@ public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork)
         
         await ValidateAsync(null, newUser.UserName, cancellationToken);
         await unitOfWork.AddAsync(newUser, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
         return newUser;
     }
 
@@ -57,7 +55,6 @@ public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork)
         await ValidateAsync(null, userName, cancellationToken);
         user.UserName = userName;
         user.NormalizedUserName = normalizedUserName;
-        await unitOfWork.SaveChangesAsync(cancellationToken);
         return user;
     }
 
@@ -75,7 +72,6 @@ public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork)
         var user = await userRepository.GetUserByIdAsync(userId, true, cancellationToken)
                    ?? throw new UserNotFound(userId);
         update(user);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
         return user;
     }
 }

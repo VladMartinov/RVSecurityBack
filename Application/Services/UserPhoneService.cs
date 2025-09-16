@@ -38,8 +38,6 @@ public class UserPhoneService(IPhoneValidator phoneValidator, IUserPhoneReposito
     {
         var userPhoneModel = dto.Adapt<UserPhone>();
         await ValidateAsync(userPhoneModel.UserId, userPhoneModel.IsPrimary, userPhoneModel.PhoneNumber, cancellationToken);
-        await unitOfWork.AddAsync(userPhoneModel, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
         return userPhoneModel;
     }
 
@@ -74,7 +72,6 @@ public class UserPhoneService(IPhoneValidator phoneValidator, IUserPhoneReposito
         
         existing.UpdatedAt = DateTime.UtcNow;
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
         return existing;
     }
 
@@ -83,6 +80,5 @@ public class UserPhoneService(IPhoneValidator phoneValidator, IUserPhoneReposito
         var userPhone = await userPhoneRepository.GetUserPhoneAsync(id, true, cancellationToken)
                         ?? throw new UserPhoneNotFoundException(id);
         unitOfWork.Remove(userPhone);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

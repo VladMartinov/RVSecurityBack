@@ -32,7 +32,6 @@ public class UserRoleService(IUserRoleRepository userRoleRepository, IRoleReposi
             AssignedAt = DateTime.UtcNow
         };
         await unitOfWork.AddAsync(userRoleModel, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
         return userRoleModel;
     }
     public async Task<IEnumerable<UserRole>> SetUserRoles(Guid userId, IEnumerable<Guid> roleIds, CancellationToken cancellationToken = default)
@@ -46,7 +45,6 @@ public class UserRoleService(IUserRoleRepository userRoleRepository, IRoleReposi
             AssignedAt = DateTime.UtcNow
         }).ToList();
         await unitOfWork.AddRangeAsync(userRoleModel, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
         return userRoleModel;
     }
 
@@ -61,7 +59,6 @@ public class UserRoleService(IUserRoleRepository userRoleRepository, IRoleReposi
             AssignedAt = DateTime.UtcNow
         };
         await unitOfWork.AddAsync(userRoleModel, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
         return userRoleModel;
     }
 
@@ -77,7 +74,6 @@ public class UserRoleService(IUserRoleRepository userRoleRepository, IRoleReposi
             AssignedAt = DateTime.UtcNow
         }).ToList();
         await unitOfWork.AddRangeAsync(userRoleModel, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
         return userRoleModel;
     }
 
@@ -88,6 +84,5 @@ public class UserRoleService(IUserRoleRepository userRoleRepository, IRoleReposi
         var userRole = await userRoleRepository.GetUserRoleAsync(userId, roleId, true, cancellationToken)
                        ?? throw new UserRoleNotFoundException(userId, roleId);
         unitOfWork.Remove(userRole);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

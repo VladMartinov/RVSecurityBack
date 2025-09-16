@@ -31,7 +31,6 @@ public class UserTokenService(IUserTokenRepository userTokenRepository, IUserRep
         await Validate(tokenCreationRequest, cancellationToken);
         var userToken = tokenCreationRequest.Adapt<UserToken>();
         await unitOfWork.AddAsync(userToken, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
         return userToken;
     }
 
@@ -48,7 +47,6 @@ public class UserTokenService(IUserTokenRepository userTokenRepository, IUserRep
         token.RevokeReason = tokenUpdateRequest.RevokeInfo.RevokeReason;
         token.UpdatedAt = DateTime.UtcNow;
         
-        await unitOfWork.SaveChangesAsync(cancellationToken);
         return token;
     }
 
@@ -57,6 +55,5 @@ public class UserTokenService(IUserTokenRepository userTokenRepository, IUserRep
         var token = await userTokenRepository.GetTokenByIdAsync(id, true, cancellationToken)
                     ?? throw new TokenNotFoundException(id);
         unitOfWork.Remove(token);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }
